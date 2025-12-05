@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XO 井字棋遊戲</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2em;
+      background-color: #fff;
+      border: 1px solid #333;
+      cursor: pointer;
+    }
+    .cell:hover {
+      background-color: #f0f0f0;
+    }
+    .scoreboard {
+      margin-bottom: 20px;
+      font-size: 1.2em;
+    }
+    .buttons {
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>XO 井字棋</h1>
+
+  <div class="scoreboard">
+    <p>玩家 X: <span id="scoreX">0</span> - 玩家 O: <span id="scoreO">0</span> - 和局: <span id="draws">0</span></p>
+  </div>
+
+  <div class="board" id="board">
+    <div class="cell" data-index="0"></div>
+    <div class="cell" data-index="1"></div>
+    <div class="cell" data-index="2"></div>
+    <div class="cell" data-index="3"></div>
+    <div class="cell" data-index="4"></div>
+    <div class="cell" data-index="5"></div>
+    <div class="cell" data-index="6"></div>
+    <div class="cell" data-index="7"></div>
+    <div class="cell" data-index="8"></div>
+  </div>
+
+  <div class="buttons">
+    <button id="resetGame">重設遊戲</button>
+    <button id="resetScore">重設比分</button>
+  </div>
+
+  <script>
+    let currentPlayer = 'X';
+    let gameBoard = ['', '', '', '', '', '', '', '', ''];
+    let scoreX = 0, scoreO = 0, draws = 0;
+
+    const cells = document.querySelectorAll('.cell');
+    const scoreXElement = document.getElementById('scoreX');
+    const scoreOElement = document.getElementById('scoreO');
+    const drawsElement = document.getElementById('draws');
+
+    const winningCombos = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+      [0, 4, 8], [2, 4, 6] // diagonals
+    ];
+
+    function checkWinner() {
+      for (let combo of winningCombos) {
+        const [a, b, c] = combo;
+        if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+          return gameBoard[a];
+        }
+      }
+      return gameBoard.includes('') ? null : 'draw';
+    }
+
+    function updateScore(result) {
+      if (result === 'X') {
+        scoreX++;
+        scoreXElement.textContent = scoreX;
+      } else if (result === 'O') {
+        scoreO++;
+        scoreOElement.textContent = scoreO;
+      } else if (result === 'draw') {
+        draws++;
+        drawsElement.textContent = draws;
+      }
+    }
+
+    function handleCellClick(event) {
+      const cell = event.target;
+      const index = cell.getAttribute('data-index');
+      if (gameBoard[index]) return; // If the cell is already taken, do nothing
+
+      gameBoard[index] = currentPlayer;
+      cell.textContent = currentPlayer;
+
+      const winner = checkWinner();
+      if (winner) {
+        setTimeout(() => {
+          if (winner === 'draw') {
+            alert('和局！');
+          } else {
+            alert(winner + ' 贏了！');
+          }
+          updateScore(winner);
+          resetBoard();
+        }, 100);
+      } else {
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      }
+    }
+
+    function resetBoard() {
+      gameBoard = ['', '', '', '', '', '', '', '', ''];
+      cells.forEach(cell => cell.textContent = '');
+      currentPlayer = 'X';
+    }
+
+    document.getElementById('resetGame').addEventListener('click', () => {
+      resetBoard();
+    });
+
+    document.getElementById('resetScore').addEventListener('click', () => {
+      scoreX = 0;
+      scoreO = 0;
+      draws = 0;
+      scoreXElement.textContent = scoreX;
+      scoreOElement.textContent = scoreO;
+      drawsElement.textContent = draws;
+    });
+
+    cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+  </script>
+
+</body>
+</html>
